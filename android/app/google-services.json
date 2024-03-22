@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "589602296410",
+    "project_id": "livit-1904",
+    "storage_bucket": "livit-1904.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:589602296410:android:94f3f8440ccb0669e8fe63",
+        "android_client_info": {
+          "package_name": "com.example.livit"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDTNECEUkRrG-V_7d-ZfN89aCNhqnPcd1k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
