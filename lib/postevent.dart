@@ -98,6 +98,32 @@ class _PostEventState extends State<PostEvent> {
     }
   }
 
+  // Function to display an alert dialog
+  Future<void> showUploadDialog(BuildContext context) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // User must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Uploading Data'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('Please wait while data is being uploaded...'),
+                CircularProgressIndicator(), // Loading indicator
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+// Function to remove the alert dialog
+  void removeUploadDialog(BuildContext context) {
+    Navigator.of(context).pop();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -613,6 +639,17 @@ class _PostEventState extends State<PostEvent> {
                       eventCategorycontroller.text != '' &&
                       startdatecontroller.text != '' &&
                       enddatecontroller.text != '') {
+                    Get.defaultDialog(
+                        barrierDismissible: false,
+                        backgroundColor: const Color.fromARGB(255, 38, 38, 38),
+                        titlePadding: EdgeInsets.all(20),
+                        title: 'Uploading Event..',
+                        titleStyle: TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w600),
+                        content: Lottie.asset('assets/images/uploading.json',
+                            height: 80, width: 80, repeat: true));
                     var link = await uploadFileAndGetUrl();
                     await collref.doc(clubnamecontroller.text).set({
                       'name': namecontroller.text,
@@ -626,6 +663,7 @@ class _PostEventState extends State<PostEvent> {
                       'eventMode': (eventMode) ? 'Offline' : 'Online',
                       'path': link,
                     });
+                    Get.back();
                     Get.dialog(
                         barrierDismissible: true,
                         barrierColor: const Color.fromARGB(255, 21, 21, 21),
@@ -644,14 +682,6 @@ class _PostEventState extends State<PostEvent> {
                         ));
                     await Future.delayed(const Duration(milliseconds: 5500));
                     Get.back();
-
-                    // // Show success Snackbar
-                    // Get.snackbar(
-                    //   "Success",
-                    //   "Congratulations! Your event has been posted.",
-                    //   backgroundColor: Colors.green,
-                    //   colorText: Colors.white,
-                    // );
 
                     namecontroller.text = '';
                     desccontroller.text = '';
