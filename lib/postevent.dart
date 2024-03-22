@@ -1,19 +1,18 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+// import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
 import 'package:file_picker/file_picker.dart';
-
-// import 'package:file_picker/file_picker.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 
 class PostEvent extends StatefulWidget {
   const PostEvent({super.key});
-
   @override
   State<PostEvent> createState() => _PostEventState();
 }
@@ -31,28 +30,16 @@ class _PostEventState extends State<PostEvent> {
   bool eventMode = false;
 
   String getFormattedDate() {
-    // Get today's date
     DateTime now = DateTime.now();
-
-    // Create a date format
     DateFormat formatter = DateFormat('dd/MM/yyyy');
-
-    // Format the date and return as a string
     String formattedDate = formatter.format(now);
     return formattedDate;
   }
 
   String getFormattedDateplusone() {
-    // Get today's date
     DateTime now = DateTime.now();
-
-    // Add one day to the current date
     DateTime tomorrow = now.add(const Duration(days: 2));
-
-    // Create a date format
     DateFormat formatter = DateFormat('dd/MM/yyyy');
-
-    // Format the date and return as a string
     String formattedDate = formatter.format(tomorrow);
     return formattedDate;
   }
@@ -66,8 +53,7 @@ class _PostEventState extends State<PostEvent> {
     );
     if (picked != null) {
       setState(() {
-        startdatecontroller.text = DateFormat('dd-MM-yy')
-            .format(picked); // You can format the date as per your requirement
+        startdatecontroller.text = DateFormat('dd-MM-yy').format(picked);
       });
     }
   }
@@ -81,16 +67,35 @@ class _PostEventState extends State<PostEvent> {
     );
     if (picked != null) {
       setState(() {
-        enddatecontroller.text = DateFormat('dd-MM-yy')
-            .format(picked); // You can format the date as per your requirement
+        enddatecontroller.text = DateFormat('dd-MM-yy').format(picked);
       });
     }
   }
 
+  PlatformFile? pickedFile;
   Future selectFile() async {
     final result = await FilePicker.platform.pickFiles(
         type: Platform.isAndroid ? FileType.any : FileType.custom,
         allowedExtensions: Platform.isAndroid ? null : ['bin', 'nano']);
+    setState(() {
+      pickedFile = result!.files.first;
+    });
+  }
+
+  Future<String> uploadFileAndGetUrl() async {
+    try {
+      final path = 'files/${pickedFile!.name}';
+      final uploadFile = File(pickedFile!.path!);
+      final storageRef = FirebaseStorage.instance.ref().child(path);
+      await storageRef.putFile(uploadFile);
+      final String downloadURL = await storageRef.getDownloadURL();
+      print('File uploaded successfully. Download URL: $downloadURL');
+      return downloadURL;
+    } catch (error) {
+      print('Error uploading file: $error');
+      // Handle error as needed, e.g., show an error message to the user.
+      return ''; // Return an empty string or null indicating failure.
+    }
   }
 
   @override
@@ -160,10 +165,15 @@ class _PostEventState extends State<PostEvent> {
                           borderRadius: BorderRadius.circular(20)),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(20),
-                        child: Image(
-                            fit: BoxFit.cover,
-                            image: NetworkImage(
-                                'https://www.gaim.com/static/placeholder-dark.png')),
+                        child: (pickedFile != null)
+                            ? Image.file(
+                                File(pickedFile!.path!),
+                                fit: BoxFit.cover,
+                              )
+                            : Image.network(
+                                'https://www.gaim.com/static/placeholder-dark.png',
+                                fit: BoxFit.cover,
+                              ),
                       ),
                     ),
                     Column(
@@ -171,7 +181,7 @@ class _PostEventState extends State<PostEvent> {
                       children: [
                         Container(
                           width: 180,
-                          child: Text(
+                          child: const Text(
                             'Upload the Image Related to your Event.',
                             textAlign: TextAlign.center,
                             style: TextStyle(
@@ -180,7 +190,7 @@ class _PostEventState extends State<PostEvent> {
                                 fontWeight: FontWeight.w600),
                           ),
                         ),
-                        SizedBox(
+                        const SizedBox(
                           height: 10,
                         ),
                         GestureDetector(
@@ -193,7 +203,7 @@ class _PostEventState extends State<PostEvent> {
                             decoration: BoxDecoration(
                                 color: Colors.redAccent,
                                 borderRadius: BorderRadius.circular(10)),
-                            child: Center(
+                            child: const Center(
                               child: Text(
                                 'Upload',
                                 style: TextStyle(
@@ -603,7 +613,7 @@ class _PostEventState extends State<PostEvent> {
                       eventCategorycontroller.text != '' &&
                       startdatecontroller.text != '' &&
                       enddatecontroller.text != '') {
-// Add data to Firestore
+                    var link = await uploadFileAndGetUrl();
                     await collref.doc(clubnamecontroller.text).set({
                       'name': namecontroller.text,
                       'desc': desccontroller.text,
@@ -614,8 +624,8 @@ class _PostEventState extends State<PostEvent> {
                       'startdate': startdatecontroller.text,
                       'lastdate': enddatecontroller.text,
                       'eventMode': (eventMode) ? 'Offline' : 'Online',
+                      'path': link,
                     });
-
                     Get.dialog(
                         barrierDismissible: true,
                         barrierColor: const Color.fromARGB(255, 21, 21, 21),
@@ -627,8 +637,6 @@ class _PostEventState extends State<PostEvent> {
                           content: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              // Replace 'your_animation.json' with the path to your Lottie animation file
-                              // You may need to adjust the width and height according to your animation size
                               Lottie.asset('assets/images/doneanim.json',
                                   repeat: false, width: 250, height: 250),
                             ],

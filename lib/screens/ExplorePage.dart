@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:get/get.dart';
+import 'package:lottie/lottie.dart';
 
 class Explore extends StatelessWidget {
   const Explore({super.key});
@@ -19,6 +21,27 @@ class Explore extends StatelessWidget {
 
           if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
+          }
+          if (snapshot.data!.docs.length == 0) {
+            return Container(
+              height: 500,
+              width: double.maxFinite,
+              child: Column(
+                children: [
+                  Lottie.asset('assets/images/nodata.json'),
+                  SizedBox(
+                    height: 30,
+                  ),
+                  Text(
+                    'No Events Found',
+                    style: TextStyle(
+                        color: Colors.redAccent,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600),
+                  )
+                ],
+              ),
+            );
           }
           return ListView(
             children: snapshot.data!.docs.map((DocumentSnapshot document) {
@@ -62,8 +85,7 @@ class Explore extends StatelessWidget {
                       decoration: BoxDecoration(
                           color: Colors.grey,
                           image: DecorationImage(
-                              image:
-                                  AssetImage('assets/images/vinhackposter.jpg'),
+                              image: NetworkImage(data['path']),
                               fit: BoxFit.cover),
                           borderRadius: BorderRadius.circular(20)),
                     ),

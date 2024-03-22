@@ -42,6 +42,7 @@ dependencies:
   firebase_storage: ^11.6.10
   lottie:
   file_picker: ^8.0.0+1
+  flutter_image_compress: ^2.2.0
 
 dev_dependencies:
   flutter_test:
