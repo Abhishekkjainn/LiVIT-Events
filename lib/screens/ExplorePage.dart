@@ -5,8 +5,15 @@ import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 
-class Explore extends StatelessWidget {
+class Explore extends StatefulWidget {
   const Explore({super.key});
+
+  @override
+  State<Explore> createState() => _ExploreState();
+}
+
+class _ExploreState extends State<Explore> {
+  Map<String, bool> registeredEvents = {};
 
   Widget detailEvents(IconData Iconname, String data, String heading) {
     return IntrinsicHeight(
@@ -56,32 +63,15 @@ class Explore extends StatelessWidget {
         stream: FirebaseFirestore.instance.collection('events').snapshots(),
         builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return Center(
+                child: Lottie.asset('assets/images/loading.json',
+                    height: 150, width: 150));
           }
-
           if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
+            return erroralertbox();
           }
           if (snapshot.data!.docs.length == 0) {
-            return Container(
-              height: 500,
-              width: double.maxFinite,
-              child: Column(
-                children: [
-                  Lottie.asset('assets/images/nodata.json'),
-                  SizedBox(
-                    height: 30,
-                  ),
-                  Text(
-                    'No Events Found',
-                    style: TextStyle(
-                        color: Colors.redAccent,
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600),
-                  )
-                ],
-              ),
-            );
+            return nodataalertbox();
           }
           return ListView(
             children: snapshot.data!.docs.map((DocumentSnapshot document) {
@@ -97,6 +87,50 @@ class Explore extends StatelessWidget {
             }).toList(),
           );
         },
+      ),
+    );
+  }
+
+  Container nodataalertbox() {
+    return Container(
+      height: 500,
+      width: double.maxFinite,
+      child: Column(
+        children: [
+          Lottie.asset('assets/images/nodata.json'),
+          SizedBox(
+            height: 30,
+          ),
+          Text(
+            'No Events Found',
+            style: TextStyle(
+                color: Colors.redAccent,
+                fontSize: 20,
+                fontWeight: FontWeight.w600),
+          )
+        ],
+      ),
+    );
+  }
+
+  Container erroralertbox() {
+    return Container(
+      height: 500,
+      width: double.maxFinite,
+      child: Column(
+        children: [
+          Lottie.asset('assets/images/error.json'),
+          SizedBox(
+            height: 30,
+          ),
+          Text(
+            'Oops! Something went wrong. Blame the aliens! 👽',
+            style: TextStyle(
+                color: Colors.redAccent,
+                fontSize: 20,
+                fontWeight: FontWeight.w600),
+          )
+        ],
       ),
     );
   }
@@ -181,33 +215,87 @@ class Explore extends StatelessWidget {
                         Padding(
                           padding: const EdgeInsets.only(
                               left: 40, right: 40, top: 20),
-                          child: Container(
-                            height: 55,
-                            width: double.maxFinite,
-                            alignment: Alignment.center,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  CupertinoIcons.add_circled_solid,
-                                  size: 30,
-                                  color: Colors.white,
-                                ),
-                                SizedBox(
-                                  width: 10,
-                                ),
-                                Text(
-                                  'Registered',
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600),
-                                ),
-                              ],
+                          child: GestureDetector(
+                            onTap: () async {
+                              FirebaseFirestore.instance
+                                  .collection('events')
+                                  .doc(data['name'])
+                                  .update({
+                                'registered': FieldValue.increment(1),
+                              }).then((_) async {
+                                Get.dialog(
+                                    barrierDismissible: true,
+                                    AlertDialog(
+                                      elevation: 20,
+                                      contentPadding: const EdgeInsets.all(20),
+                                      backgroundColor:
+                                          const Color.fromARGB(255, 51, 51, 51),
+                                      content: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Lottie.asset(
+                                              'assets/images/doneanim.json',
+                                              repeat: false,
+                                              width: 250,
+                                              height: 250),
+                                        ],
+                                      ),
+                                    ));
+                                await Future.delayed(Duration(
+                                    milliseconds: 3000)); // Wait for 3 seconds
+                                Get.back(); // Close the dialog
+                              }).catchError((error) async {
+                                Get.dialog(
+                                    barrierDismissible: true,
+                                    AlertDialog(
+                                      elevation: 20,
+                                      contentPadding: const EdgeInsets.all(20),
+                                      backgroundColor:
+                                          const Color.fromARGB(255, 51, 51, 51),
+                                      content: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Lottie.asset(
+                                              'assets/images/failed.json',
+                                              repeat: false,
+                                              width: 250,
+                                              height: 250),
+                                        ],
+                                      ),
+                                    ));
+                                await Future.delayed(Duration(
+                                    milliseconds: 3000)); // Wait for 3 seconds
+                                Get.back(); // Close the dialog
+                              });
+                            },
+                            child: Container(
+                              height: 55,
+                              width: double.maxFinite,
+                              alignment: Alignment.center,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    CupertinoIcons.add_circled_solid,
+                                    size: 30,
+                                    color: Colors.white,
+                                  ),
+                                  SizedBox(
+                                    width: 10,
+                                  ),
+                                  Text(
+                                    'Registered',
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600),
+                                  ),
+                                ],
+                              ),
+                              decoration: BoxDecoration(
+                                  color: Colors.redAccent,
+                                  borderRadius: BorderRadius.circular(20)),
                             ),
-                            decoration: BoxDecoration(
-                                color: Colors.redAccent,
-                                borderRadius: BorderRadius.circular(20)),
                           ),
                         ),
                         Padding(
@@ -353,7 +441,7 @@ class Explore extends StatelessWidget {
                               height: 5,
                             ),
                             Text(
-                              data['desc'],
+                              data['tagline'],
                               maxLines: 3,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
@@ -534,7 +622,7 @@ class Explore extends StatelessWidget {
                                     width: 5,
                                   ),
                                   Text(
-                                    'Registration - Open',
+                                    'Registrations - ${data['registered']}',
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: TextStyle(

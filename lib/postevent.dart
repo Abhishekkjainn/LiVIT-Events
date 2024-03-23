@@ -27,6 +27,7 @@ class _PostEventState extends State<PostEvent> {
   TextEditingController startdatecontroller = TextEditingController();
   TextEditingController enddatecontroller = TextEditingController();
   TextEditingController eventmodecontroller = TextEditingController();
+  TextEditingController taglinecontroller = TextEditingController();
   bool eventMode = false;
 
   String getFormattedDate() {
@@ -48,8 +49,8 @@ class _PostEventState extends State<PostEvent> {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2101),
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2025),
     );
     if (picked != null) {
       setState(() {
@@ -60,10 +61,11 @@ class _PostEventState extends State<PostEvent> {
 
   Future<void> _selectEndDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
+      barrierColor: Colors.black,
       context: context,
       initialDate: DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2101),
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2025),
     );
     if (picked != null) {
       setState(() {
@@ -268,6 +270,48 @@ class _PostEventState extends State<PostEvent> {
                     fontWeight: FontWeight.w600),
                 decoration: InputDecoration(
                     hintText: 'Dream Merchants',
+                    hintStyle: const TextStyle(
+                        color: Color.fromARGB(255, 42, 40, 40),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600),
+                    prefixIcon: const Icon(
+                      CupertinoIcons.building_2_fill,
+                      color: Colors.redAccent,
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                        borderSide: const BorderSide(
+                            color: Color.fromARGB(255, 207, 207, 207),
+                            width: 2),
+                        borderRadius: BorderRadius.circular(15)),
+                    enabled: true,
+                    enabledBorder: OutlineInputBorder(
+                        borderSide: const BorderSide(
+                            color: Color.fromARGB(255, 88, 88, 88), width: 2),
+                        borderRadius: BorderRadius.circular(15))),
+              ),
+            ),
+            const Padding(
+              padding: EdgeInsets.only(left: 40, right: 20, bottom: 5, top: 20),
+              child: Text(
+                'Tagline',
+                style: TextStyle(
+                    color: Color.fromARGB(255, 61, 61, 61),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 20, right: 20),
+              child: TextFormField(
+                controller: taglinecontroller,
+                cursorColor: Colors.redAccent,
+                maxLines: null,
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600),
+                decoration: InputDecoration(
+                    hintText: 'Fun Event',
                     hintStyle: const TextStyle(
                         color: Color.fromARGB(255, 42, 40, 40),
                         fontSize: 14,
@@ -642,17 +686,19 @@ class _PostEventState extends State<PostEvent> {
                     Get.defaultDialog(
                         barrierDismissible: false,
                         backgroundColor: const Color.fromARGB(255, 38, 38, 38),
-                        titlePadding: EdgeInsets.all(20),
+                        titlePadding: const EdgeInsets.all(20),
                         title: 'Uploading Event..',
-                        titleStyle: TextStyle(
+                        titleStyle: const TextStyle(
                             color: Colors.white,
                             fontSize: 20,
                             fontWeight: FontWeight.w600),
                         content: Lottie.asset('assets/images/uploading.json',
                             height: 80, width: 80, repeat: true));
                     var link = await uploadFileAndGetUrl();
-                    await collref.doc(clubnamecontroller.text).set({
+
+                    await collref.doc(namecontroller.text).set({
                       'name': namecontroller.text,
+                      'tagline': taglinecontroller.text,
                       'desc': desccontroller.text,
                       'clubname': clubnamecontroller.text,
                       'venue': venuecontroller.text,
@@ -662,6 +708,10 @@ class _PostEventState extends State<PostEvent> {
                       'lastdate': enddatecontroller.text,
                       'eventMode': (eventMode) ? 'Offline' : 'Online',
                       'path': link,
+                      'registered': 0,
+                      'rsvp': 0,
+                      'favourites': 0,
+                      'uploadedBy': 'abhishekjain2022@vitstudent.ac.in',
                     });
                     Get.back();
                     Get.dialog(
@@ -681,6 +731,7 @@ class _PostEventState extends State<PostEvent> {
                           ),
                         ));
                     await Future.delayed(const Duration(milliseconds: 5500));
+                    Get.back();
                     Get.back();
 
                     namecontroller.text = '';
