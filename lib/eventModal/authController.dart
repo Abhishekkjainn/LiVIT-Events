@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -12,9 +13,36 @@ class AuthController extends GetxController {
   String? username;
   String? regno;
   String? image;
+  bool access = false;
+  checkAccessForClubs() async {
+    try {
+      // Access Firestore collection "ClubMembers"
+      QuerySnapshot querySnapshot =
+          await FirebaseFirestore.instance.collection('ClubMembers').get();
+
+      // Process each document in the snapshot
+      for (QueryDocumentSnapshot doc in querySnapshot.docs) {
+        // Access document fields
+        // String clubName = doc['clubName'];
+        // String memberName = doc['memberName'];
+
+        if (doc.id == userEmail) {
+          print('found a match');
+          access = true;
+          break;
+        } else {
+          access = false;
+        }
+        print(access);
+      }
+    } catch (e) {
+      print('Error fetching data: $e');
+    }
+  }
 
   checkIfLoggedIn(context) async {
     User? user = FirebaseAuth.instance.currentUser;
+    print(user);
     await Future.delayed(const Duration(milliseconds: 2500));
     if (user != null) {
       if (user.email!.endsWith('@vitstudent.ac.in')) {
@@ -28,15 +56,16 @@ class AuthController extends GetxController {
         username = parts.join(' ');
         userEmail = user.email;
         image = user.photoURL;
-
         userEmail = user.email;
+        checkAccessForClubs();
       } else {
+        // logoutWithGoogle(context);
         await Future.delayed(Duration.zero);
-        showIllegalLoginDialog(context);
-        logoutWithGoogle(context);
+        // showIllegalLoginDialog(context);
         Get.off(() => const Login(), transition: Transition.rightToLeft);
       }
     } else {
+      // logoutWithGoogle(context);
       Get.off(() => const Login(), transition: Transition.rightToLeft);
     }
     update();
@@ -76,16 +105,10 @@ class AuthController extends GetxController {
   }
 
   logoutWithGoogle(context) async {
-    showLoggedoutDialog(context);
-    regno = '';
-
-// Join the remaining parts to get the rest of the name
-    username = '';
-    userEmail = '';
-    image = '';
-    await Future.delayed(const Duration(milliseconds: 2500));
     await GoogleSignIn().signOut();
-    update();
+    await FirebaseAuth.instance.signOut();
+    showLoggedoutDialog(context);
+    await Future.delayed(const Duration(milliseconds: 2500));
   }
 
   void showIllegalLoginDialog(context) {

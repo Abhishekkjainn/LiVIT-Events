@@ -5,6 +5,7 @@ import 'package:livit/auth/loginPage.dart';
 import 'package:livit/eventModal/authController.dart';
 import 'package:livit/postevent.dart';
 import 'package:livit/screens/eventsPage.dart';
+import 'package:livit/screens/reqAccess.dart';
 import 'package:livit/screens/searchPage.dart';
 
 // ignore: must_be_immutable
@@ -18,7 +19,11 @@ class Home extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       home: Scaffold(
           backgroundColor: const Color.fromARGB(255, 16, 16, 16),
-          drawer: drawerHome(context),
+          drawer: GetBuilder<AuthController>(
+            builder: (controller) {
+              return drawerHome(context);
+            },
+          ),
           drawerEnableOpenDragGesture: true,
           // drawerScrimColor: Color.fromARGB(255, 0, 0, 0),
           appBar: appBarmain(),
@@ -34,8 +39,43 @@ class Home extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             introContainer(),
-            postEventButton(),
-            logoutButton(context),
+            (controller.access) ? postEventButton() : RequestClubAccessButton(),
+            Padding(
+              padding: const EdgeInsets.only(left: 20, right: 20),
+              child: GestureDetector(
+                onTap: () async {
+                  await controller.logoutWithGoogle(context);
+                  Get.offAll(() => Login());
+                },
+                child: Container(
+                  width: double.maxFinite,
+                  alignment: Alignment.center,
+                  height: 60,
+                  decoration: BoxDecoration(
+                      color: Colors.redAccent,
+                      borderRadius: BorderRadius.circular(20)),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.power_settings_new,
+                        color: Colors.white,
+                      ),
+                      SizedBox(
+                        width: 15,
+                      ),
+                      Text(
+                        'Log Out',
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -80,13 +120,52 @@ class Home extends StatelessWidget {
     );
   }
 
+  Padding RequestClubAccessButton() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20, left: 20, right: 20, top: 20),
+      child: GestureDetector(
+        onTap: () {
+          Get.back();
+          Get.to(() => const RequestClubAccessPage(),
+              transition: Transition.rightToLeft);
+        },
+        child: Container(
+          width: double.maxFinite,
+          alignment: Alignment.center,
+          height: 60,
+          decoration: BoxDecoration(
+              color: Colors.blue, borderRadius: BorderRadius.circular(20)),
+          child: const Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                CupertinoIcons.paperplane_fill,
+                color: Colors.white,
+              ),
+              SizedBox(
+                width: 15,
+              ),
+              Text(
+                'Request Club Access',
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Padding logoutButton(context) {
     return Padding(
       padding: const EdgeInsets.only(left: 20, right: 20),
       child: GestureDetector(
         onTap: () async {
           await controller.logoutWithGoogle(context);
-          Get.off(() => const Login());
+          Get.off(() => Login());
         },
         child: Container(
           width: double.maxFinite,
