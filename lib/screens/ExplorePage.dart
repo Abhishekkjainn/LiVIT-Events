@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class Explore extends StatefulWidget {
   const Explore({super.key});
@@ -15,14 +16,6 @@ class Explore extends StatefulWidget {
 
 class _ExploreState extends State<Explore> {
   Map<String, bool> registeredEvents = {};
-  // Function to open the URL
-  void launchURL(Uri url) async {
-    if (await canLaunchUrl(url)) {
-      await launchUrl(url);
-    } else {
-      print('Cant Launch');
-    }
-  }
 
   Widget detailEvents(IconData Iconname, String data, String heading) {
     return IntrinsicHeight(
@@ -343,8 +336,14 @@ class _ExploreState extends State<Explore> {
                           padding: const EdgeInsets.only(
                               left: 40, right: 40, top: 10),
                           child: GestureDetector(
-                            onTap: () {
-                              launchURL(Uri.parse(data['externalwebsite']));
+                            onTap: () async {
+                              print(data['externalwebsite']);
+                              try {
+                                await launchUrlString(data['externalwebsite']);
+                              } catch (e) {
+                                print(e);
+                                // print('cantopen because of $e');
+                              }
                             },
                             child: Container(
                               height: 55,
@@ -363,6 +362,7 @@ class _ExploreState extends State<Explore> {
                                   ),
                                   Text(
                                     'Visit Website',
+                                    // data['externalwebsite'],
                                     style: TextStyle(
                                         color: Colors.black,
                                         fontSize: 16,

@@ -2,6 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:get/get.dart';
+import 'package:livit/auth/loginPage.dart';
+import 'package:livit/eventModal/authController.dart';
 import 'package:livit/home.dart';
 import 'firebase_options.dart';
 
@@ -35,43 +37,54 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+  authController controller = Get.put(authController());
+
   @override
   void initState() {
-    goToHome();
+    Future.delayed(Duration.zero, () async {
+      controller.checkIfLoggedIn(context);
+    });
+
     super.initState();
   }
 
-  void goToHome() async {
-    await Future.delayed(Duration(milliseconds: 3000));
-    Get.offAll(() => Home(), transition: Transition.downToUp);
-  }
+  // void goToHome() async {
+  //   await Future.delayed(Duration(milliseconds: 3000));
+  //   Get.offAll(() => Login(), transition: Transition.downToUp);
+  // }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: Container(
-        height: MediaQuery.of(context).size.height,
-        color: Colors.black,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              CupertinoIcons.location_circle,
-              color: Colors.redAccent,
-              size: 36,
-            ),
-            SizedBox(
-              width: 10,
-            ),
-            Text(
-              'LiVIT',
-              style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.w600),
-            )
-          ],
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        backgroundColor: Colors.black,
+        body: Container(
+          height: MediaQuery.of(context).size.height,
+          color: Colors.black,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Hero(
+                tag: 'appBarTitleIcon',
+                child: Icon(
+                  CupertinoIcons.location_circle,
+                  color: Colors.redAccent,
+                  size: 56,
+                ),
+              ),
+              SizedBox(
+                width: 10,
+              ),
+              Text(
+                'LiVIT',
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.w600),
+              )
+            ],
+          ),
         ),
       ),
     );

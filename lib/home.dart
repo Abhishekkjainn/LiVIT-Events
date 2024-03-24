@@ -1,22 +1,29 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get/get_state_manager/get_state_manager.dart';
+import 'package:livit/auth/loginPage.dart';
+import 'package:livit/eventModal/authController.dart';
 import 'package:livit/postevent.dart';
 import 'package:livit/screens/eventsPage.dart';
 import 'package:livit/screens/searchPage.dart';
 
 class Home extends StatelessWidget {
-  const Home({super.key});
+  Home({super.key});
+  authController controller = Get.put(authController());
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        backgroundColor: const Color.fromARGB(255, 16, 16, 16),
-        drawer: drawerHome(),
-        drawerEnableOpenDragGesture: true,
-        drawerScrimColor: Color.fromARGB(255, 0, 0, 0),
-        appBar: appBarmain(),
-        body: EventsPage());
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+          backgroundColor: const Color.fromARGB(255, 16, 16, 16),
+          drawer: drawerHome(),
+          drawerEnableOpenDragGesture: true,
+          drawerScrimColor: Color.fromARGB(255, 0, 0, 0),
+          appBar: appBarmain(),
+          body: EventsPage()),
+    );
   }
 
   Drawer drawerHome() {
@@ -25,6 +32,42 @@ class Home extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 20, right: 20),
+            child: GestureDetector(
+              onTap: () async {
+                await controller.logoutWithGoogle();
+                Get.off(() => Login());
+              },
+              child: Container(
+                width: double.maxFinite,
+                alignment: Alignment.center,
+                height: 60,
+                decoration: BoxDecoration(
+                    color: Colors.redAccent,
+                    borderRadius: BorderRadius.circular(20)),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.power_settings_new,
+                      color: Colors.white,
+                    ),
+                    SizedBox(
+                      width: 15,
+                    ),
+                    Text(
+                      'Log Out',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
           Padding(
             padding:
                 const EdgeInsets.only(bottom: 20, left: 20, right: 20, top: 20),
@@ -86,9 +129,12 @@ class Home extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                CupertinoIcons.location_circle,
-                color: Colors.redAccent,
+              Hero(
+                tag: 'appBarTitleIcon',
+                child: Icon(
+                  CupertinoIcons.location_circle,
+                  color: Colors.redAccent,
+                ),
               ),
               SizedBox(
                 width: 10,
