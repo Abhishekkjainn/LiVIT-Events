@@ -4,7 +4,6 @@ import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:livit/eventModal/authController.dart';
 import 'package:lottie/lottie.dart';
-import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -14,7 +13,7 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
-  authController controller = Get.put(authController());
+  AuthController controller = Get.put(AuthController());
   @override
   void initState() {
     super.initState();
@@ -72,7 +71,7 @@ class _LoginState extends State<Login> {
                       fontWeight: FontWeight.w600),
                 ),
               ),
-              GetBuilder<authController>(
+              GetBuilder<AuthController>(
                 builder: (controller) {
                   return GestureDetector(
                     onTap: () {

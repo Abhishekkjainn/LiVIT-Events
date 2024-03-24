@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class Upcoming extends StatefulWidget {
   const Upcoming({super.key});
@@ -309,6 +310,50 @@ class _UpcomingState extends State<Upcoming> {
                             decoration: BoxDecoration(
                                 color: Colors.blue,
                                 borderRadius: BorderRadius.circular(20)),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(
+                              left: 40, right: 40, top: 10),
+                          child: GestureDetector(
+                            onTap: () async {
+                              print(data['externalwebsite']);
+                              try {
+                                await launchUrlString(data['externalwebsite']);
+                              } catch (e) {
+                                print(e);
+                                // print('cantopen because of $e');
+                              }
+                            },
+                            child: Container(
+                              height: 55,
+                              width: double.maxFinite,
+                              alignment: Alignment.center,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    CupertinoIcons.link_circle_fill,
+                                    size: 30,
+                                    color: Colors.black,
+                                  ),
+                                  SizedBox(
+                                    width: 10,
+                                  ),
+                                  Text(
+                                    'Visit Website',
+                                    // data['externalwebsite'],
+                                    style: TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600),
+                                  ),
+                                ],
+                              ),
+                              decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(20)),
+                            ),
                           ),
                         ),
                         Padding(

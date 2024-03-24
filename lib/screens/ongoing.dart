@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class onGoing extends StatefulWidget {
   onGoing({super.key});
@@ -101,11 +102,16 @@ class _onGoingState extends State<onGoing> {
                   document.data() as Map<String, dynamic>;
               String startDate = data['startdate'];
               String endDate = data['lastdate'];
+              bool isDateBetween(
+                  String date, String startDate, String endDate) {
+                return (date == startDate ||
+                    date == endDate ||
+                    (isDate1AfterDate2(date, startDate) &&
+                        !isDate1AfterDate2(date, endDate)));
+              }
 
               // Check if today's date is equal to the start date or falls between start and end date
-              if (startDate == formattedDate ||
-                  (startDate == endDate &&
-                      !isDate1AfterDate2(formattedDate, endDate))) {
+              if (isDateBetween(formattedDate, startDate, endDate)) {
                 return eventDisplay(data, context);
               } else {
                 return Container();
@@ -356,6 +362,50 @@ class _onGoingState extends State<onGoing> {
                             decoration: BoxDecoration(
                                 color: Colors.blue,
                                 borderRadius: BorderRadius.circular(20)),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(
+                              left: 40, right: 40, top: 10),
+                          child: GestureDetector(
+                            onTap: () async {
+                              print(data['externalwebsite']);
+                              try {
+                                await launchUrlString(data['externalwebsite']);
+                              } catch (e) {
+                                print(e);
+                                // print('cantopen because of $e');
+                              }
+                            },
+                            child: Container(
+                              height: 55,
+                              width: double.maxFinite,
+                              alignment: Alignment.center,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    CupertinoIcons.link_circle_fill,
+                                    size: 30,
+                                    color: Colors.black,
+                                  ),
+                                  SizedBox(
+                                    width: 10,
+                                  ),
+                                  Text(
+                                    'Visit Website',
+                                    // data['externalwebsite'],
+                                    style: TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600),
+                                  ),
+                                ],
+                              ),
+                              decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(20)),
+                            ),
                           ),
                         ),
                         Padding(

@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
+import 'package:top_snackbar_flutter/custom_snack_bar.dart';
+import 'package:top_snackbar_flutter/top_snack_bar.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
@@ -225,27 +227,15 @@ class _ExploreState extends State<Explore> {
                                   .update({
                                 'registered': FieldValue.increment(1),
                               }).then((_) async {
-                                Get.dialog(
-                                    barrierDismissible: true,
-                                    AlertDialog(
-                                      elevation: 20,
-                                      contentPadding: const EdgeInsets.all(20),
-                                      backgroundColor:
-                                          const Color.fromARGB(255, 51, 51, 51),
-                                      content: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Lottie.asset(
-                                              'assets/images/doneanim.json',
-                                              repeat: false,
-                                              width: 250,
-                                              height: 250),
-                                        ],
-                                      ),
-                                    ));
-                                await Future.delayed(Duration(
-                                    milliseconds: 3000)); // Wait for 3 seconds
-                                Get.back(); // Close the dialog
+                                showTopSnackBar(
+                                  Overlay.of(context),
+                                  CustomSnackBar.success(
+                                    message: "Registered Succefully.",
+                                  ),
+                                );
+                                // await Future.delayed(Duration(
+                                //     milliseconds: 3000)); // Wait for 3 seconds
+                                // Get.back(); // Close the dialog
                               }).catchError((error) async {
                                 Get.dialog(
                                     barrierDismissible: true,
