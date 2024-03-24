@@ -12,56 +12,59 @@ class Home extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: const Color.fromARGB(255, 16, 16, 16),
-        drawer: Drawer(
-          backgroundColor: const Color.fromARGB(255, 23, 23, 23),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(
-                    bottom: 20, left: 20, right: 20, top: 20),
-                child: GestureDetector(
-                  onTap: () {
-                    Get.back();
-                    Get.to(() => PostEvent(),
-                        transition: Transition.rightToLeft);
-                  },
-                  child: Container(
-                    width: double.maxFinite,
-                    alignment: Alignment.center,
-                    height: 60,
-                    decoration: BoxDecoration(
-                        color: Colors.blue,
-                        borderRadius: BorderRadius.circular(20)),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          CupertinoIcons.paperplane_fill,
-                          color: Colors.white,
-                        ),
-                        SizedBox(
-                          width: 15,
-                        ),
-                        Text(
-                          'Post Events',
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              )
-            ],
-          ),
-        ),
+        drawer: drawerHome(),
         drawerEnableOpenDragGesture: true,
         drawerScrimColor: Color.fromARGB(255, 0, 0, 0),
         appBar: appBarmain(),
         body: EventsPage());
+  }
+
+  Drawer drawerHome() {
+    return Drawer(
+      backgroundColor: const Color.fromARGB(255, 23, 23, 23),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          Padding(
+            padding:
+                const EdgeInsets.only(bottom: 20, left: 20, right: 20, top: 20),
+            child: GestureDetector(
+              onTap: () {
+                Get.back();
+                Get.to(() => PostEvent(), transition: Transition.rightToLeft);
+              },
+              child: Container(
+                width: double.maxFinite,
+                alignment: Alignment.center,
+                height: 60,
+                decoration: BoxDecoration(
+                    color: Colors.blue,
+                    borderRadius: BorderRadius.circular(20)),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      CupertinoIcons.paperplane_fill,
+                      color: Colors.white,
+                    ),
+                    SizedBox(
+                      width: 15,
+                    ),
+                    Text(
+                      'Post Events',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          )
+        ],
+      ),
+    );
   }
 
   AppBar appBarmain() {
@@ -114,37 +117,6 @@ class Home extends StatelessWidget {
             ))
       ],
       backgroundColor: const Color.fromARGB(255, 16, 16, 16),
-    );
-  }
-
-  AppBar appbarmain() {
-    return AppBar(
-      backgroundColor: const Color.fromARGB(255, 16, 16, 16),
-      actions: [
-        Padding(
-          padding: const EdgeInsets.only(right: 10),
-          child: GestureDetector(
-            onTap: () {
-              Get.to(() => PostEvent());
-            },
-            child: Container(
-              decoration: BoxDecoration(
-                  color: Colors.blue, borderRadius: BorderRadius.circular(10)),
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
-                child: Text(
-                  'Add Event',
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600),
-                ),
-              ),
-            ),
-          ),
-        )
-      ],
     );
   }
 }

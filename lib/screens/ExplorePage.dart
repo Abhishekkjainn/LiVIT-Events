@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class Explore extends StatefulWidget {
   const Explore({super.key});
@@ -14,6 +15,14 @@ class Explore extends StatefulWidget {
 
 class _ExploreState extends State<Explore> {
   Map<String, bool> registeredEvents = {};
+  // Function to open the URL
+  void launchURL(Uri url) async {
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url);
+    } else {
+      print('Cant Launch');
+    }
+  }
 
   Widget detailEvents(IconData Iconname, String data, String heading) {
     return IntrinsicHeight(
@@ -328,6 +337,43 @@ class _ExploreState extends State<Explore> {
                             decoration: BoxDecoration(
                                 color: Colors.blue,
                                 borderRadius: BorderRadius.circular(20)),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(
+                              left: 40, right: 40, top: 10),
+                          child: GestureDetector(
+                            onTap: () {
+                              launchURL(Uri.parse(data['externalwebsite']));
+                            },
+                            child: Container(
+                              height: 55,
+                              width: double.maxFinite,
+                              alignment: Alignment.center,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    CupertinoIcons.link_circle_fill,
+                                    size: 30,
+                                    color: Colors.black,
+                                  ),
+                                  SizedBox(
+                                    width: 10,
+                                  ),
+                                  Text(
+                                    'Visit Website',
+                                    style: TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600),
+                                  ),
+                                ],
+                              ),
+                              decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(20)),
+                            ),
                           ),
                         ),
                         Padding(

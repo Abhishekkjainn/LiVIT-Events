@@ -28,6 +28,7 @@ class _PostEventState extends State<PostEvent> {
   TextEditingController enddatecontroller = TextEditingController();
   TextEditingController eventmodecontroller = TextEditingController();
   TextEditingController taglinecontroller = TextEditingController();
+  TextEditingController extlinkcontroller = TextEditingController();
   bool eventMode = false;
 
   String getFormattedDate() {
@@ -75,6 +76,7 @@ class _PostEventState extends State<PostEvent> {
   }
 
   PlatformFile? pickedFile;
+  PlatformFile? pickedFileClub;
   Future selectFile() async {
     final result = await FilePicker.platform.pickFiles(
         type: Platform.isAndroid ? FileType.any : FileType.custom,
@@ -84,10 +86,35 @@ class _PostEventState extends State<PostEvent> {
     });
   }
 
+  Future selectFileClub() async {
+    final result = await FilePicker.platform.pickFiles(
+        type: Platform.isAndroid ? FileType.any : FileType.custom,
+        allowedExtensions: Platform.isAndroid ? null : ['bin', 'nano']);
+    setState(() {
+      pickedFileClub = result!.files.first;
+    });
+  }
+
   Future<String> uploadFileAndGetUrl() async {
     try {
       final path = 'files/${pickedFile!.name}';
       final uploadFile = File(pickedFile!.path!);
+      final storageRef = FirebaseStorage.instance.ref().child(path);
+      await storageRef.putFile(uploadFile);
+      final String downloadURL = await storageRef.getDownloadURL();
+      print('File uploaded successfully. Download URL: $downloadURL');
+      return downloadURL;
+    } catch (error) {
+      print('Error uploading file: $error');
+      // Handle error as needed, e.g., show an error message to the user.
+      return ''; // Return an empty string or null indicating failure.
+    }
+  }
+
+  Future<String> uploadFileAndGetUrlClub() async {
+    try {
+      final path = 'clubs/${pickedFileClub!.name}';
+      final uploadFile = File(pickedFileClub!.path!);
       final storageRef = FirebaseStorage.instance.ref().child(path);
       await storageRef.putFile(uploadFile);
       final String downloadURL = await storageRef.getDownloadURL();
@@ -233,7 +260,77 @@ class _PostEventState extends State<PostEvent> {
                                 borderRadius: BorderRadius.circular(10)),
                             child: const Center(
                               child: Text(
-                                'Upload',
+                                'Select',
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600),
+                              ),
+                            ),
+                          ),
+                        )
+                      ],
+                    )
+                  ],
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 20, top: 20),
+              child: Padding(
+                padding: const EdgeInsets.only(right: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      height: 100,
+                      width: 100,
+                      decoration: BoxDecoration(
+                          border: Border.all(color: Colors.redAccent, width: 2),
+                          borderRadius: BorderRadius.circular(20)),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(20),
+                        child: (pickedFileClub != null)
+                            ? Image.file(
+                                File(pickedFileClub!.path!),
+                                fit: BoxFit.cover,
+                              )
+                            : Image.network(
+                                'https://www.gaim.com/static/placeholder-dark.png',
+                                fit: BoxFit.cover,
+                              ),
+                      ),
+                    ),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Container(
+                          width: 180,
+                          child: const Text(
+                            'Add your Club Logo',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                color: Color.fromARGB(255, 61, 61, 61),
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            selectFileClub();
+                          },
+                          child: Container(
+                            height: 40,
+                            width: 150,
+                            decoration: BoxDecoration(
+                                color: Colors.redAccent,
+                                borderRadius: BorderRadius.circular(10)),
+                            child: const Center(
+                              child: Text(
+                                'Select',
                                 style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 14,
@@ -588,6 +685,48 @@ class _PostEventState extends State<PostEvent> {
                         borderRadius: BorderRadius.circular(15))),
               ),
             ),
+            const Padding(
+              padding: EdgeInsets.only(left: 40, right: 20, bottom: 5, top: 20),
+              child: Text(
+                'External Website link',
+                style: TextStyle(
+                    color: Color.fromARGB(255, 61, 61, 61),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 20, right: 20),
+              child: TextFormField(
+                controller: extlinkcontroller,
+                cursorColor: Colors.redAccent,
+                maxLines: null,
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600),
+                decoration: InputDecoration(
+                    hintText: 'www.dreamerchantsvit.com',
+                    hintStyle: const TextStyle(
+                        color: Color.fromARGB(255, 42, 40, 40),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600),
+                    prefixIcon: const Icon(
+                      CupertinoIcons.person_3_fill,
+                      color: Colors.redAccent,
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                        borderSide: const BorderSide(
+                            color: Color.fromARGB(255, 207, 207, 207),
+                            width: 2),
+                        borderRadius: BorderRadius.circular(15)),
+                    enabled: true,
+                    enabledBorder: OutlineInputBorder(
+                        borderSide: const BorderSide(
+                            color: Color.fromARGB(255, 88, 88, 88), width: 2),
+                        borderRadius: BorderRadius.circular(15))),
+              ),
+            ),
             Padding(
               padding: const EdgeInsets.only(
                   left: 20, right: 20, bottom: 5, top: 20),
@@ -675,6 +814,15 @@ class _PostEventState extends State<PostEvent> {
                       colorText: Colors.white,
                     );
                   }
+                  if (extlinkcontroller.text == '') {
+                    Get.snackbar(
+                      "Error",
+                      "Enter Your Website Link (if no official Website is there. Add VTOP Registration link for your event)",
+                      backgroundColor: Colors.red,
+                      colorText: Colors.white,
+                    );
+                  }
+
                   if (namecontroller.text != '' &&
                       enddatecontroller.text != '' &&
                       desccontroller.text != '' &&
@@ -695,6 +843,7 @@ class _PostEventState extends State<PostEvent> {
                         content: Lottie.asset('assets/images/uploading.json',
                             height: 80, width: 80, repeat: true));
                     var link = await uploadFileAndGetUrl();
+                    var clubLink = await uploadFileAndGetUrlClub();
 
                     await collref.doc(namecontroller.text).set({
                       'name': namecontroller.text,
@@ -708,10 +857,12 @@ class _PostEventState extends State<PostEvent> {
                       'lastdate': enddatecontroller.text,
                       'eventMode': (eventMode) ? 'Offline' : 'Online',
                       'path': link,
+                      'clubpath': clubLink,
                       'registered': 0,
                       'rsvp': 0,
                       'favourites': 0,
                       'uploadedBy': 'abhishekjain2022@vitstudent.ac.in',
+                      'externalwebsite': extlinkcontroller.text,
                     });
                     Get.back();
                     Get.dialog(

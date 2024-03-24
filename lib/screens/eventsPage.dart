@@ -152,14 +152,14 @@ class _EventsPageState extends State<EventsPage> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Icon(
-                          CupertinoIcons.clock_solid,
+                          CupertinoIcons.link_circle_fill,
                           color: (mainIndex == 2) ? Colors.white : Colors.grey,
                         ),
                         SizedBox(
                           width: 8,
                         ),
                         Text(
-                          'Ongoing',
+                          'Live Events',
                           style: TextStyle(
                               color:
                                   (mainIndex == 2) ? Colors.white : Colors.grey,
