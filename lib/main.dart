@@ -48,11 +48,6 @@ class _SplashScreenState extends State<SplashScreen> {
     super.initState();
   }
 
-  // void goToHome() async {
-  //   await Future.delayed(Duration(milliseconds: 3000));
-  //   Get.offAll(() => Login(), transition: Transition.downToUp);
-  // }
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

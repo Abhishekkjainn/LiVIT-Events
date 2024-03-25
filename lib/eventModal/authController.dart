@@ -14,7 +14,10 @@ class AuthController extends GetxController {
   String? regno;
   String? image;
   bool access = false;
-  checkAccessForClubs() async {
+  String? clubname;
+  String? boardposition;
+
+  checkAccessForClubs(context) async {
     try {
       // Access Firestore collection "ClubMembers"
       QuerySnapshot querySnapshot =
@@ -27,16 +30,31 @@ class AuthController extends GetxController {
         // String memberName = doc['memberName'];
 
         if (doc.id == userEmail) {
-          print('found a match');
           access = true;
+          showTopSnackBar(
+            Overlay.of(context),
+            const CustomSnackBar.success(
+              message: "You Have Club Access \nPost A New Event.",
+            ),
+          );
+          clubname = doc['clubname'];
+          boardposition = doc['boardposition'];
           break;
         } else {
           access = false;
         }
         print(access);
+        update();
       }
     } catch (e) {
       print('Error fetching data: $e');
+      // showTopSnackBar(
+      //   Overlay.of(context),
+      //   const CustomSnackBar.error(
+      //     message: "Cant Get your Club Access Information.\nPlease Try Again",
+      //   ),
+      // );
+      update();
     }
   }
 
@@ -57,7 +75,7 @@ class AuthController extends GetxController {
         userEmail = user.email;
         image = user.photoURL;
         userEmail = user.email;
-        checkAccessForClubs();
+        checkAccessForClubs(context);
       } else {
         // logoutWithGoogle(context);
         await Future.delayed(Duration.zero);
@@ -98,7 +116,7 @@ class AuthController extends GetxController {
         Get.offAll(() => Home(), transition: Transition.downToUp);
       } else {
         showIllegalLoginDialog(context);
-        await GoogleSignIn().signOut();
+        logoutWithGoogle(context);
       }
     }
     update();
@@ -107,8 +125,8 @@ class AuthController extends GetxController {
   logoutWithGoogle(context) async {
     await GoogleSignIn().signOut();
     await FirebaseAuth.instance.signOut();
-    showLoggedoutDialog(context);
     await Future.delayed(const Duration(milliseconds: 2500));
+    showLoggedoutDialog(context);
   }
 
   void showIllegalLoginDialog(context) {

@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 // import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:livit/eventModal/authController.dart';
 import 'package:lottie/lottie.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
@@ -18,6 +19,7 @@ class PostEvent extends StatefulWidget {
 }
 
 class _PostEventState extends State<PostEvent> {
+  AuthController controller = Get.find();
   TextEditingController namecontroller = TextEditingController();
   TextEditingController clubnamecontroller = TextEditingController();
   TextEditingController desccontroller = TextEditingController();
@@ -151,6 +153,12 @@ class _PostEventState extends State<PostEvent> {
 // Function to remove the alert dialog
   void removeUploadDialog(BuildContext context) {
     Navigator.of(context).pop();
+  }
+
+  @override
+  void initState() {
+    clubnamecontroller = TextEditingController(text: controller.clubname);
+    super.initState();
   }
 
   @override
@@ -360,6 +368,7 @@ class _PostEventState extends State<PostEvent> {
               child: TextFormField(
                 controller: clubnamecontroller,
                 cursorColor: Colors.redAccent,
+                readOnly: true,
                 maxLines: null,
                 style: const TextStyle(
                     color: Colors.white,
@@ -849,7 +858,7 @@ class _PostEventState extends State<PostEvent> {
                       'name': namecontroller.text,
                       'tagline': taglinecontroller.text,
                       'desc': desccontroller.text,
-                      'clubname': clubnamecontroller.text,
+                      'clubname': controller.clubname,
                       'venue': venuecontroller.text,
                       'category': eventCategorycontroller.text,
                       'collabName': collabcontroller.text,
@@ -861,8 +870,10 @@ class _PostEventState extends State<PostEvent> {
                       'registered': 0,
                       'rsvp': 0,
                       'favourites': 0,
-                      'uploadedBy': 'abhishekjain2022@vitstudent.ac.in',
+                      'uploadedBy': controller.userEmail,
                       'externalwebsite': extlinkcontroller.text,
+                      'registeredContestants': '',
+                      'rsvpContestants': ''
                     });
                     Get.back();
                     Get.dialog(

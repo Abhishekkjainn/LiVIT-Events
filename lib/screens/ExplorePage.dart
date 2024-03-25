@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
+import 'package:livit/eventModal/authController.dart';
 import 'package:lottie/lottie.dart';
 import 'package:top_snackbar_flutter/custom_snack_bar.dart';
 import 'package:top_snackbar_flutter/top_snack_bar.dart';
@@ -18,6 +20,8 @@ class Explore extends StatefulWidget {
 
 class _ExploreState extends State<Explore> {
   Map<String, bool> registeredEvents = {};
+  AuthController controller = Get.find();
+  String? oldRegs;
 
   Widget detailEvents(IconData Iconname, String data, String heading) {
     return IntrinsicHeight(
@@ -221,44 +225,43 @@ class _ExploreState extends State<Explore> {
                               left: 40, right: 40, top: 20),
                           child: GestureDetector(
                             onTap: () async {
-                              FirebaseFirestore.instance
+                              DocumentReference docRef = FirebaseFirestore
+                                  .instance
                                   .collection('events')
-                                  .doc(data['name'])
-                                  .update({
-                                'registered': FieldValue.increment(1),
-                              }).then((_) async {
+                                  .doc(data['name']);
+
+                              DocumentSnapshot document =
+                                  await FirebaseFirestore.instance
+                                      .collection('events')
+                                      .doc(data['name'])
+                                      .get();
+
+                              oldRegs =
+                                  document['registeredContestants'].toString();
+
+                              if (oldRegs!.contains(controller.userEmail!)) {
+                                // print('Already Registered');
                                 showTopSnackBar(
                                   Overlay.of(context),
-                                  CustomSnackBar.success(
-                                    message: "Registered Succefully.",
+                                  const CustomSnackBar.error(
+                                    message: "Already Registered for Event",
                                   ),
                                 );
-                                // await Future.delayed(Duration(
-                                //     milliseconds: 3000)); // Wait for 3 seconds
-                                // Get.back(); // Close the dialog
-                              }).catchError((error) async {
-                                Get.dialog(
-                                    barrierDismissible: true,
-                                    AlertDialog(
-                                      elevation: 20,
-                                      contentPadding: const EdgeInsets.all(20),
-                                      backgroundColor:
-                                          const Color.fromARGB(255, 51, 51, 51),
-                                      content: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Lottie.asset(
-                                              'assets/images/failed.json',
-                                              repeat: false,
-                                              width: 250,
-                                              height: 250),
-                                        ],
-                                      ),
-                                    ));
-                                await Future.delayed(Duration(
-                                    milliseconds: 3000)); // Wait for 3 seconds
-                                Get.back(); // Close the dialog
-                              });
+                              } else {
+                                docRef.update({
+                                  'registeredContestants':
+                                      ('${controller.userEmail} , ${oldRegs!}')
+                                });
+                                docRef.update(
+                                    {'registered': FieldValue.increment(1)});
+                                showTopSnackBar(
+                                  Overlay.of(context),
+                                  const CustomSnackBar.success(
+                                    message:
+                                        "Registered For the Event\nCheck Your Registrations",
+                                  ),
+                                );
+                              }
                             },
                             child: Container(
                               height: 55,
@@ -290,36 +293,78 @@ class _ExploreState extends State<Explore> {
                             ),
                           ),
                         ),
+
                         Padding(
                           padding: const EdgeInsets.only(
                               left: 40, right: 40, top: 10),
-                          child: Container(
-                            height: 55,
-                            width: double.maxFinite,
-                            alignment: Alignment.center,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  CupertinoIcons.command,
-                                  size: 30,
-                                  color: Colors.white,
-                                ),
-                                SizedBox(
-                                  width: 10,
-                                ),
-                                Text(
-                                  'RSVP',
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600),
-                                ),
-                              ],
+                          child: GestureDetector(
+                            onTap: () async {
+                              DocumentReference docRef = FirebaseFirestore
+                                  .instance
+                                  .collection('events')
+                                  .doc(data['name']);
+
+                              DocumentSnapshot document =
+                                  await FirebaseFirestore.instance
+                                      .collection('events')
+                                      .doc(data['name'])
+                                      .get();
+
+                              oldRegs = document['rsvpContestants'].toString();
+
+                              if (oldRegs!.contains(controller.userEmail!)) {
+                                // print('Already Registered');
+                                showTopSnackBar(
+                                  Overlay.of(context),
+                                  const CustomSnackBar.error(
+                                    message:
+                                        "You are already going for the Event",
+                                  ),
+                                );
+                              } else {
+                                docRef.update({
+                                  'rsvpContestants':
+                                      ('${controller.userEmail} , ${oldRegs!}')
+                                });
+                                docRef
+                                    .update({'rsvp': FieldValue.increment(1)});
+                                showTopSnackBar(
+                                  Overlay.of(context),
+                                  const CustomSnackBar.success(
+                                    message:
+                                        "Added your name for the Refreshments List",
+                                  ),
+                                );
+                              }
+                            },
+                            child: Container(
+                              height: 55,
+                              width: double.maxFinite,
+                              alignment: Alignment.center,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    CupertinoIcons.command,
+                                    size: 30,
+                                    color: Colors.white,
+                                  ),
+                                  SizedBox(
+                                    width: 10,
+                                  ),
+                                  Text(
+                                    'RSVP',
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600),
+                                  ),
+                                ],
+                              ),
+                              decoration: BoxDecoration(
+                                  color: Colors.blue,
+                                  borderRadius: BorderRadius.circular(20)),
                             ),
-                            decoration: BoxDecoration(
-                                color: Colors.blue,
-                                borderRadius: BorderRadius.circular(20)),
                           ),
                         ),
                         Padding(

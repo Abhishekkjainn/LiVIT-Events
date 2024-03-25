@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -7,10 +8,18 @@ import 'package:livit/postevent.dart';
 import 'package:livit/screens/eventsPage.dart';
 import 'package:livit/screens/reqAccess.dart';
 import 'package:livit/screens/searchPage.dart';
+import 'package:top_snackbar_flutter/custom_snack_bar.dart';
+import 'package:top_snackbar_flutter/top_snack_bar.dart';
 
 // ignore: must_be_immutable
-class Home extends StatelessWidget {
+class Home extends StatefulWidget {
   Home({super.key});
+
+  @override
+  State<Home> createState() => _HomeState();
+}
+
+class _HomeState extends State<Home> {
   AuthController controller = Get.put(AuthController());
 
   @override
@@ -36,47 +45,56 @@ class Home extends StatelessWidget {
       backgroundColor: const Color.fromARGB(255, 23, 23, 23),
       child: SingleChildScrollView(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             introContainer(),
-            (controller.access) ? postEventButton() : RequestClubAccessButton(),
-            Padding(
-              padding: const EdgeInsets.only(left: 20, right: 20),
-              child: GestureDetector(
-                onTap: () async {
-                  await controller.logoutWithGoogle(context);
-                  Get.offAll(() => Login());
-                },
-                child: Container(
-                  width: double.maxFinite,
-                  alignment: Alignment.center,
-                  height: 60,
-                  decoration: BoxDecoration(
-                      color: Colors.redAccent,
-                      borderRadius: BorderRadius.circular(20)),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.power_settings_new,
-                        color: Colors.white,
-                      ),
-                      SizedBox(
-                        width: 15,
-                      ),
-                      Text(
-                        'Log Out',
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+            GetBuilder<AuthController>(
+              builder: (controller) {
+                return (controller.access)
+                    ? postEventButton()
+                    : RequestClubAccessButton();
+              },
             ),
+            logoutButton(context),
           ],
+        ),
+      ),
+    );
+  }
+
+  Padding logoutButton(context) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 20, right: 20),
+      child: GestureDetector(
+        onTap: () async {
+          await controller.logoutWithGoogle(context);
+          Get.offAll(() => Login());
+        },
+        child: Container(
+          width: double.maxFinite,
+          alignment: Alignment.center,
+          height: 60,
+          decoration: BoxDecoration(
+              color: Colors.redAccent, borderRadius: BorderRadius.circular(20)),
+          child: const Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.power_settings_new,
+                color: Colors.white,
+              ),
+              SizedBox(
+                width: 15,
+              ),
+              Text(
+                'Log Out',
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -124,10 +142,54 @@ class Home extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20, left: 20, right: 20, top: 20),
       child: GestureDetector(
-        onTap: () {
-          Get.back();
-          Get.to(() => const RequestClubAccessPage(),
-              transition: Transition.rightToLeft);
+        onTap: () async {
+          bool go = false;
+
+          QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+              .collection('ClubAccessRequests')
+              .get();
+
+          if (querySnapshot.docs.length == 0) {
+            Get.to(() => RequestClubAccessPage(),
+                transition: Transition.rightToLeft);
+          } else {
+            for (QueryDocumentSnapshot doc in querySnapshot.docs) {
+              if (controller.userEmail == doc['vitemail']) {
+                if (doc['reviewed'] == false) {
+                  showTopSnackBar(
+                    Overlay.of(context),
+                    const CustomSnackBar.error(
+                      message:
+                          "One Request is Already Pending..\nPlease Wait till it gets Approved.",
+                    ),
+                  );
+                  print('search 2');
+                  go = false;
+                }
+                if (doc['reviewed'] == true && doc['accepted'] == false) {
+                  showTopSnackBar(
+                    Overlay.of(context),
+                    const CustomSnackBar.error(
+                      message:
+                          "Your Request was Rejected\nContact Team for Details",
+                    ),
+                  );
+                }
+                break;
+              }
+
+              if (controller.userEmail != doc['vitemail']) {
+                go = true;
+                print('search3');
+              }
+            }
+            if (go == true) {
+              Get.to(() => RequestClubAccessPage(),
+                  transition: Transition.rightToLeft);
+              print('search4');
+            }
+          }
+          ;
         },
         child: Container(
           width: double.maxFinite,
@@ -147,44 +209,6 @@ class Home extends StatelessWidget {
               ),
               Text(
                 'Request Club Access',
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Padding logoutButton(context) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 20, right: 20),
-      child: GestureDetector(
-        onTap: () async {
-          await controller.logoutWithGoogle(context);
-          Get.off(() => Login());
-        },
-        child: Container(
-          width: double.maxFinite,
-          alignment: Alignment.center,
-          height: 60,
-          decoration: BoxDecoration(
-              color: Colors.redAccent, borderRadius: BorderRadius.circular(20)),
-          child: const Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.power_settings_new,
-                color: Colors.white,
-              ),
-              SizedBox(
-                width: 15,
-              ),
-              Text(
-                'Log Out',
                 style: TextStyle(
                     color: Colors.white,
                     fontSize: 16,
@@ -286,7 +310,82 @@ class Home extends StatelessWidget {
                       ),
                     ],
                   ),
-                )
+                ),
+                (controller.access)
+                    ? Padding(
+                        padding:
+                            const EdgeInsets.only(top: 20, left: 10, right: 10),
+                        child: Row(children: [
+                          const Icon(
+                            CupertinoIcons.checkmark_alt_circle_fill,
+                            color: Colors.greenAccent,
+                          ),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          Container(
+                            width: 180,
+                            child: Text(
+                              'Club Access Granted',
+                              style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600),
+                            ),
+                          ),
+                        ]),
+                      )
+                    : Container(),
+                (controller.access)
+                    ? Padding(
+                        padding:
+                            const EdgeInsets.only(top: 20, left: 10, right: 10),
+                        child: Row(children: [
+                          const Icon(
+                            CupertinoIcons.building_2_fill,
+                            color: Colors.greenAccent,
+                          ),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          Container(
+                            width: 180,
+                            child: Text(
+                              'Club - ${controller.clubname}',
+                              style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600),
+                            ),
+                          ),
+                        ]),
+                      )
+                    : Container(),
+                (controller.access)
+                    ? Padding(
+                        padding:
+                            const EdgeInsets.only(top: 20, left: 10, right: 10),
+                        child: Row(children: [
+                          const Icon(
+                            CupertinoIcons.person_2_fill,
+                            color: Colors.greenAccent,
+                          ),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          Container(
+                            width: 180,
+                            child: Text(
+                              'Board - ${controller.boardposition}',
+                              style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600),
+                            ),
+                          ),
+                        ]),
+                      )
+                    : Container(),
               ],
             ),
           ),
