@@ -19,7 +19,6 @@ class Explore extends StatefulWidget {
 }
 
 class _ExploreState extends State<Explore> {
-  Map<String, bool> registeredEvents = {};
   AuthController controller = Get.find();
   String? oldRegs;
 
@@ -91,7 +90,7 @@ class _ExploreState extends State<Explore> {
                       width: double.maxFinite,
                       child: Center(child: CircularProgressIndicator()),
                     )
-                  : eventDisplay(data, context); // Pass the context here
+                  : eventDisplay(data, context);
             }).toList(),
           );
         },

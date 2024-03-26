@@ -8,6 +8,7 @@ import 'package:livit/postevent.dart';
 import 'package:livit/screens/eventsPage.dart';
 import 'package:livit/screens/reqAccess.dart';
 import 'package:livit/screens/searchPage.dart';
+import 'package:livit/screens/uploadedEventsandData.dart';
 import 'package:top_snackbar_flutter/custom_snack_bar.dart';
 import 'package:top_snackbar_flutter/top_snack_bar.dart';
 
@@ -21,6 +22,12 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   AuthController controller = Get.put(AuthController());
+  @override
+  void initState() {
+    controller.checkAccessForClubs(context);
+    // TODO: implement initState
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,6 +55,44 @@ class _HomeState extends State<Home> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             introContainer(),
+            (controller.access)
+                ? GestureDetector(
+                    onTap: () {
+                      Get.to(() => UploadedData(),
+                          transition: Transition.rightToLeft);
+                    },
+                    child: Padding(
+                      padding:
+                          const EdgeInsets.only(left: 20, right: 20, top: 20),
+                      child: Container(
+                        height: 60,
+                        width: double.maxFinite,
+                        decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(20)),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              CupertinoIcons.info_circle_fill,
+                              color: Colors.black,
+                            ),
+                            SizedBox(
+                              width: 10,
+                            ),
+                            Text(
+                              'Uploaded Events',
+                              style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600),
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                  )
+                : Container(),
             GetBuilder<AuthController>(
               builder: (controller) {
                 return (controller.access)
