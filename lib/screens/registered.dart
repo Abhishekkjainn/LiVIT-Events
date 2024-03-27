@@ -83,7 +83,7 @@ class Registered extends StatelessWidget {
                     : (data['registeredContestants']
                             .contains(controller.userEmail))
                         ? eventDisplay(data, context)
-                        : Container(); // Pass the context here
+                        : Container();
               }).toList(),
             );
           },

@@ -37,10 +37,13 @@ class _LoginState extends State<Login> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Icon(
-                      CupertinoIcons.location_circle,
-                      color: Colors.redAccent,
-                      size: 50,
+                    Hero(
+                      tag: 'appBarTitleIcon',
+                      child: Icon(
+                        CupertinoIcons.location_circle,
+                        color: Colors.redAccent,
+                        size: 50,
+                      ),
                     ),
                     SizedBox(
                       width: 15,

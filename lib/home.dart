@@ -1,9 +1,14 @@
+import 'dart:ui';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:livit/announcements/uploadAnnouncement.dart';
 import 'package:livit/auth/loginPage.dart';
 import 'package:livit/eventModal/authController.dart';
+import 'package:livit/mainScreen/blogs.dart';
+import 'package:livit/mainScreen/chats.dart';
 import 'package:livit/postevent.dart';
 import 'package:livit/screens/eventsPage.dart';
 import 'package:livit/screens/reqAccess.dart';
@@ -11,6 +16,8 @@ import 'package:livit/screens/searchPage.dart';
 import 'package:livit/screens/uploadedEventsandData.dart';
 import 'package:top_snackbar_flutter/custom_snack_bar.dart';
 import 'package:top_snackbar_flutter/top_snack_bar.dart';
+import 'package:google_nav_bar/google_nav_bar.dart';
+import 'package:livit/announcements/announcement.dart';
 
 // ignore: must_be_immutable
 class Home extends StatefulWidget {
@@ -29,21 +36,86 @@ class _HomeState extends State<Home> {
     super.initState();
   }
 
+  final List homeScreens = [
+    EventsPage(),
+    const Announcements(),
+    const Chats(),
+    const Blogs()
+  ];
+  int mainIndex = 0;
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
-          backgroundColor: const Color.fromARGB(255, 16, 16, 16),
-          drawer: GetBuilder<AuthController>(
-            builder: (controller) {
-              return drawerHome(context);
-            },
+        extendBody: true,
+        backgroundColor: const Color.fromARGB(255, 16, 16, 16),
+        drawer: GetBuilder<AuthController>(
+          builder: (controller) {
+            return drawerHome(context);
+          },
+        ),
+        drawerEnableOpenDragGesture: true,
+        appBar: appBarmain(),
+        body: homeScreens[mainIndex],
+        bottomNavigationBar: Padding(
+          padding: const EdgeInsets.only(left: 5, right: 5, bottom: 5, top: 20),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(40),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+              child: Container(
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(40),
+                    color: Colors.black.withOpacity(0.5)),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: GNav(
+                      onTabChange: (value) {
+                        setState(() {
+                          mainIndex = value;
+                        });
+                      },
+                      haptic: true,
+                      tabBorderRadius: 40,
+                      tabActiveBorder:
+                          Border.all(color: Colors.redAccent, width: 2),
+                      curve: Curves.easeIn,
+                      duration: Duration(milliseconds: 200),
+                      gap: 4,
+                      color: Colors.grey,
+                      activeColor: Colors.white.withOpacity(1),
+                      iconSize: 24,
+                      tabBackgroundColor: Colors.redAccent.withOpacity(0.1),
+                      padding: EdgeInsets.only(
+                          left: 10, right: 10, top: 15, bottom: 15),
+                      tabs: [
+                        GButton(
+                          icon: CupertinoIcons.sparkles,
+                          text: 'Events',
+                          textSize: 12,
+                        ),
+                        GButton(
+                          icon: CupertinoIcons.bell_circle_fill,
+                          text: 'Announcements',
+                          textSize: 12,
+                        ),
+                        GButton(
+                          icon: CupertinoIcons.chat_bubble_2_fill,
+                          text: 'Chat',
+                        ),
+                        GButton(
+                          icon: Icons.message_rounded,
+                          text: 'Blogs',
+                        )
+                      ]),
+                ),
+              ),
+            ),
           ),
-          drawerEnableOpenDragGesture: true,
-          // drawerScrimColor: Color.fromARGB(255, 0, 0, 0),
-          appBar: appBarmain(),
-          body: EventsPage()),
+        ),
+      ),
     );
   }
 
@@ -55,33 +127,41 @@ class _HomeState extends State<Home> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             introContainer(),
+            (controller.access) ? uploadedEvents() : Container(),
+            GetBuilder<AuthController>(
+              builder: (controller) {
+                return (controller.access)
+                    ? postEventButton()
+                    : RequestClubAccessButton();
+              },
+            ),
             (controller.access)
                 ? GestureDetector(
                     onTap: () {
-                      Get.to(() => UploadedData(),
+                      Get.to(() => UploadAnnouncements(),
                           transition: Transition.rightToLeft);
                     },
                     child: Padding(
-                      padding:
-                          const EdgeInsets.only(left: 20, right: 20, top: 20),
+                      padding: const EdgeInsets.only(
+                          left: 20, right: 20, top: 0, bottom: 20),
                       child: Container(
                         height: 60,
                         width: double.maxFinite,
                         decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: Colors.yellowAccent,
                             borderRadius: BorderRadius.circular(20)),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(
-                              CupertinoIcons.info_circle_fill,
+                              CupertinoIcons.speaker_1_fill,
                               color: Colors.black,
                             ),
                             SizedBox(
                               width: 10,
                             ),
                             Text(
-                              'Uploaded Events',
+                              'Add Announcement',
                               style: TextStyle(
                                   color: Colors.black,
                                   fontSize: 16,
@@ -93,15 +173,44 @@ class _HomeState extends State<Home> {
                     ),
                   )
                 : Container(),
-            GetBuilder<AuthController>(
-              builder: (controller) {
-                return (controller.access)
-                    ? postEventButton()
-                    : RequestClubAccessButton();
-              },
-            ),
             logoutButton(context),
           ],
+        ),
+      ),
+    );
+  }
+
+  GestureDetector uploadedEvents() {
+    return GestureDetector(
+      onTap: () {
+        Get.to(() => UploadedData(), transition: Transition.rightToLeft);
+      },
+      child: Padding(
+        padding: const EdgeInsets.only(left: 20, right: 20, top: 20),
+        child: Container(
+          height: 60,
+          width: double.maxFinite,
+          decoration: BoxDecoration(
+              color: Colors.white, borderRadius: BorderRadius.circular(20)),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                CupertinoIcons.info_circle_fill,
+                color: Colors.black,
+              ),
+              SizedBox(
+                width: 10,
+              ),
+              Text(
+                'Uploaded Events',
+                style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600),
+              )
+            ],
+          ),
         ),
       ),
     );

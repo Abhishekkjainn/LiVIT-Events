@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:intl/intl.dart';
 import 'package:livit/auth/loginPage.dart';
 import 'package:livit/home.dart';
 import 'package:top_snackbar_flutter/custom_snack_bar.dart';
@@ -16,6 +17,26 @@ class AuthController extends GetxController {
   bool access = false;
   String? clubname;
   String? boardposition;
+
+  String getFormattedDate() {
+    // Get the current date
+    DateTime now = DateTime.now();
+
+    // Format the date as "dd-mm-yy"
+    String formattedDate = DateFormat('dd-MM-yy').format(now);
+
+    return formattedDate;
+  }
+
+  String getFormattedTime() {
+    // Get the current time
+    DateTime now = DateTime.now();
+
+    // Format the time as "hh:mm:ss"
+    String formattedTime = DateFormat('HH:mm:ss').format(now);
+
+    return formattedTime;
+  }
 
   checkAccessForClubs(context) async {
     try {
@@ -64,7 +85,7 @@ class AuthController extends GetxController {
     await Future.delayed(const Duration(milliseconds: 2500));
     if (user != null) {
       if (user.email!.endsWith('@vitstudent.ac.in')) {
-        Get.off(() => Home(), transition: Transition.downToUp);
+        Get.off(() => Home());
         String displayName = user.displayName!;
         List<String> parts = displayName.split(' ');
         String lastPart = parts.isNotEmpty ? parts.last : '';
